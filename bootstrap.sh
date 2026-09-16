@@ -1,36 +1,27 @@
 #!/bin/bash
-
-# Зупиняємо виконання скрипта у разі виникнення помилки
 set -e
 
-echo "🚀 Створення кластера Kind..."
-# Якщо кластер вже існує, ця команда може видати помилку.
-# За потреби додай прапорець --name твій-кластер
+echo "1. Створюємо кластер Kind..."
 kind create cluster --config cluster.yml
 
-echo "⏳ Очікування готовності нод..."
-kubectl wait --for=condition=Ready nodes --all --timeout=120s
+echo "2. Створюємо необхідні namespaces..."
+kubectl create namespace mysql --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace todoapp --dry-run=client -o yaml | kubectl apply -f -
 
-echo "📦 Розгортання ресурсів Kubernetes..."
-
-# 1. Спочатку створюємо Секрети та ConfigMap-и
-kubectl apply -f st-secret.yml
+echo "3. Застосовуємо конфіги та секрети..."
 kubectl apply -f st-configMap.yml
-kubectl apply -f app-secret.yml
-# Застосуй конфігмап додатку, якщо він винесений в окремий файл
-# kubectl apply -f app-configMap.yml
+kubectl apply -f st-secret.yml
+kubectl apply -f secret.yml
 
-# 2. Створюємо Persistent Volumes та Claims
-kubectl apply -f pv_tr.yml
-kubectl apply -f pvc_tr.yml
+echo "4. Застосовуємо сховище (PV та PVC)..."
+kubectl apply -f pv.yml
+kubectl apply -f pvc.yml
 
-# 3. Піднімаємо Сервіс та саму Базу Даних (StatefulSet)
+echo "5. Застосовуємо сервіси..."
 kubectl apply -f st-service.yml
+
+echo "6. Застосовуємо базу даних (StatefulSet) та додаток (Deployment)..."
 kubectl apply -f statefulSet.yml
+kubectl apply -f deployment.yml
 
-# 4. Запускаємо сам Django-додаток
-# Вкажи правильну назву файлу твого Deployment
-# kubectl apply -f deployment.yml
-
-echo "✅ Усі ресурси успішно застосовані!"
-echo "👉 Перевірте статус подів командою: kubectl get pods -A"
+echo "Успішно! Усі ресурси розгорнуто."
