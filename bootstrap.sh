@@ -13,14 +13,10 @@ kubectl apply -f st-configMap.yml
 kubectl apply -f st-secret.yml
 kubectl apply -f secret.yml
 
-echo "4. Застосовуємо сховище (PV та PVC)..."
-kubectl apply -f pv.yml
-kubectl apply -f pvc.yml
-
-echo "5. Застосовуємо сервіси..."
+echo "4. Застосовуємо сервіси..."
 kubectl apply -f st-service.yml
 
-echo "6. Застосовуємо базу даних (StatefulSet) та додаток (Deployment)..."
+echo "5. Застосовуємо базу даних (StatefulSet) та додаток (Deployment)..."
 kubectl apply -f statefulSet.yml
 kubectl apply -f deployment.yml
 
